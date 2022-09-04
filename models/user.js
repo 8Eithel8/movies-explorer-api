@@ -1,12 +1,13 @@
 // схема пользователя:
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
+
 const bcrypt = require('bcryptjs');
-const { isEmail, isURL } = require('validator');
-// const UnauthorizedError = require('../errors/unauthorized-error');
+const { isEmail } = require('validator');
+const UnauthorizedError = require('../errors/unauthorized-error');
 
 const userInvalidLoginOrPass = 'Неверный логин или пароль.';
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
 
   email: {
     type: String,
@@ -18,7 +19,7 @@ const userSchema = new mongoose.Schema({
       },
     },
   },
-// TODO Нужно задать поведение по умолчанию, чтобы база данных не возвращала это поле
+
   password: {
     type: String,
     required: true,
@@ -28,12 +29,11 @@ const userSchema = new mongoose.Schema({
 
   name: {
     type: String,
-    required: false,
+    required: true,
     minlength: 2,
     maxlength: 30,
-    default: 'Александр',
   },
-});
+}, { versionKey: false });
 
 userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   return this.findOne({ email }).select('+password')
@@ -53,4 +53,4 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
     });
 };
 
-module.exports = mongoose.model('user', userSchema);
+module.exports = model('user', userSchema);

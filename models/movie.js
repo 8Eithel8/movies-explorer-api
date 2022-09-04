@@ -1,7 +1,8 @@
 // схема фильма:
-const mongoose = require('mongoose');
-// const user = require('./user');
-const movieSchema = new mongoose.Schema({
+const { Schema, model } = require('mongoose');
+const { isURL } = require('validator');
+
+const movieSchema = new Schema({
 
   country: {
     type: String,
@@ -59,7 +60,7 @@ const movieSchema = new mongoose.Schema({
   },
 
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'user',
     required: true,
   },
@@ -78,6 +79,6 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
+}, { versionKey: false });
 
-module.exports = mongoose.model('movie', movieSchema);
+module.exports = model('movie', movieSchema);
