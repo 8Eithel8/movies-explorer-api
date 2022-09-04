@@ -1,12 +1,13 @@
 const { celebrate, Joi } = require('celebrate');
 const { isURL } = require('validator');
 const BadRequestError = require('../errors/bad-request-error');
+const { BAD_REQ_ERR_MSG } = require('../utils/constants');
 
 const validateUrl = (url) => {
   if (isURL(url, { require_protocol: true })) {
     return url;
   }
-  throw new BadRequestError('Некорректно задан url-адрес.');
+  throw new BadRequestError(BAD_REQ_ERR_MSG);
 };
 
 const validateUser = celebrate({

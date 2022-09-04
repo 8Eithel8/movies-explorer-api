@@ -8,19 +8,20 @@ const ConflictError = require('../errors/conflict-error');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const { secretKey, jwtSettings } = require('../utils/config');
-
-const userNotFound = 'Запрашиваемый пользователь не найден.';
-const userInvalidData = 'Переданы некорректные данные при создании пользователя.';
-const userInvalidProfileData = 'Переданы некорректные данные при обновлении профиля.';
-const userExists = 'Пользователь с таким логином уже зарегистрирован.';
+const {
+  USER_NOT_FOUND_ERR_MSG,
+  USER_PROFILE_DATA_ERR_MSG,
+  USER_INVALID_ERR_MSG,
+  USER_EXISTS_ERR_MSG,
+} = require('../utils/constants');
 
 module.exports.getUserMe = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => new NotFoundError(userNotFound))
+    .orFail(() => new NotFoundError(USER_NOT_FOUND_ERR_MSG))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError(userInvalidProfileData));
+        next(new BadRequestError(USER_PROFILE_DATA_ERR_MSG));
       } else next(err);
     });
 };
@@ -42,9 +43,9 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(userInvalidData));
+        next(new BadRequestError(USER_INVALID_ERR_MSG));
       } if (err.code === 11000) {
-        next(new ConflictError(userExists));
+        next(new ConflictError(USER_EXISTS_ERR_MSG));
       } else {
         next(err);
       }
@@ -71,13 +72,13 @@ module.exports.signin = (req, res, next) => {
 // обновляем инфо о пользователе
 module.exports.updateUserInfo = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true })
-    .orFail(() => new NotFoundError(userNotFound))
+    .orFail(() => new NotFoundError(USER_NOT_FOUND_ERR_MSG))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError(userInvalidProfileData));
+        next(new BadRequestError(USER_PROFILE_DATA_ERR_MSG));
       } if (err.code === 11000) {
-        next(new ConflictError(userExists));
+        next(new ConflictError(USER_EXISTS_ERR_MSG));
       } else {
         next(err);
       }

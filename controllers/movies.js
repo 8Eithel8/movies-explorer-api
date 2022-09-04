@@ -2,12 +2,12 @@ const Movies = require('../models/movie');
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
 const ForbiddenError = require('../errors/forbidden-error');
-
-const movieInvalidData = 'Переданы некорректные данные при создании фильма.';
-const movieNonexistentId = 'Передан несуществующий _id.';
-const forbidden = 'Действие запрещено.';
-
-const movieDeleteMsg = 'Фильм удалён';
+const {
+  MOVIE_INVALID_ERR_MSG,
+  MOVIE_DELETE_MSG,
+  FORBIDDEN_ERR_MSG,
+  NON_EXISTS_ID_ERR_MSG,
+} = require('../utils/constants');
 
 // получаем все карточки
 module.exports.getMovies = (req, res, next) => {
@@ -24,7 +24,7 @@ module.exports.createMovie = (req, res, next) => {
     .then((movie) => res.send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(movieInvalidData));
+        next(new BadRequestError(MOVIE_INVALID_ERR_MSG));
       } else {
         next(err);
       }
@@ -38,16 +38,16 @@ module.exports.deleteMovie = (req, res, next) => {
       (movie) => {
         const me = req.user._id;
         if (me === movie.owner.toString()) {
-          return movie.remove().then(() => res.status(200).send({ message: movieDeleteMsg }));
+          return movie.remove().then(() => res.status(200).send({ message: MOVIE_DELETE_MSG }));
         }
-        throw new ForbiddenError(forbidden);
+        throw new ForbiddenError(FORBIDDEN_ERR_MSG);
       },
     ).catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        next(new NotFoundError(movieNonexistentId));
+        next(new NotFoundError(NON_EXISTS_ID_ERR_MSG));
       } else
       if (err.name === 'CastError') {
-        next(new BadRequestError(movieNonexistentId));
+        next(new BadRequestError(NON_EXISTS_ID_ERR_MSG));
       } else {
         next(err);
       }
